@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">KM</string>
+    <string name="s1">记录</string>
+    <string name="s2">提交</string>
+    <string name="s3">返回</string>
+    <string name="s4">换</string>
+    <string name="m1">忘记</string>
+    <string name="s5">有印象</string>
+    <string name="s6">记得</string>
+</resources>
