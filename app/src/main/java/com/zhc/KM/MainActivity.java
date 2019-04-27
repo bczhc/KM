@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
         m1.setOnClickListener(v -> {
             try {
                 File f = tvAc(tv);
-                wtFFB(f, (byte) 1);
+                wtFFB(f, (byte) -1);
                 mvAc(f);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
         m2.setOnClickListener(v -> {
             try {
                 File f = tvAc(tv);
-                wtFFB(f, (byte) 2);
+                wtFFB(f, (byte) -2);
                 mvAc(f);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
         m3.setOnClickListener(v -> {
             try {
                 File f = tvAc(tv);
-                wtFFB(f, (byte) 3);
+                wtFFB(f, (byte) -3);
                 mvAc(f);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -231,13 +231,20 @@ public class MainActivity extends AppCompatActivity {
 
 
     private File tvAc(TextView textView) {
+        setFs(false);
         if (Fs.length == 0) {
             File[] hR_Fs = new File(MP + "/hR/").listFiles();
-
+            for (File f : hR_Fs) {
+                try {
+                    u_File.o.FileMove(f, new File(MP + "/t/" + f.getName() + ".n"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         List<Integer> hvT = new ArrayList<>();
         int exceptI = -1;
-        File f = null;
+        File f;
         try {
             setFs(false);
             setFsS_i();
@@ -246,8 +253,9 @@ public class MainActivity extends AppCompatActivity {
                 int i = fNInArr_fI(FsS_i, rI);
                 if (i != -1) {
                     f = new File(MP + "/t/" + Fs[i] + ".n");
-                    textView.setText(getFCtt(f).toString());
-                    break;
+                    String c = getFCtt(f).toString();
+                    textView.setText(String.format(getResources().getString(R.string.tvT), c));
+                    return f;
                 } else {
                     exceptI = rI;
                     hvT.add(rI);
@@ -287,7 +295,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
         }
-        return f;
+        return null;
     }
 
     private void firstShow(TextView textView) {
@@ -300,17 +308,8 @@ public class MainActivity extends AppCompatActivity {
         }*/
         if (setFs(true).length != 0) {
             try {
-                FileInputStream fis = new FileInputStream(MP + "/t/" + Random.ran_sc(0, Fs.length - 1) + ".n");
-                BufferedReader br = new BufferedReader(new InputStreamReader(fis, "GBK"));
-                StringBuilder sb = new StringBuilder();
-                String r = br.readLine();
-                while (r != null) {
-                    sb.append(r).append("\n");
-                    r = br.readLine();
-                }
-                textView.setText(sb.toString());
-                br.close();
-                fis.close();
+                File f = new File(MP + "/t/" + Random.ran_sc(0, Fs.length - 1) + ".n");
+                textView.setText(getFCtt(f).toString());
             } catch (Exception e) {
                 e.printStackTrace();
                 Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
