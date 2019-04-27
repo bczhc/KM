@@ -38,12 +38,13 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private int[] Fs, FsS_i;
-    private String ESD;
+    private String ESD, MP;
     private TextView tv;
 
     {
         try {
             ESD = Environment.getExternalStorageDirectory().getCanonicalPath();
+            MP = ESD + "/mNote";
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -61,8 +62,9 @@ public class MainActivity extends AppCompatActivity {
         } else {
             setContentView(R.layout.activity_main);
             File[] ds = {
-                    new File(ESD + "/mNote"),
-                    new File(ESD + "/mNote/t"),
+                    new File(MP),
+                    new File(MP + "/t"),
+                    new File(MP + "/hR")
             };
             for (File d : ds) {
                 if (!d.exists()) {
@@ -116,10 +118,10 @@ public class MainActivity extends AppCompatActivity {
                 Button sbmB = findViewById(R.id.submitB);
                 final EditText et = findViewById(R.id.editText);
                 sbmB.setOnClickListener(v12 -> {
-                    File iF = new File(ESD + "/mNote/i");
+                    File iF = new File(MP + "/i");
                     int i = 0;
                     try {
-                        File d = new File(ESD + "/mNote/");
+                        File d = new File(MP + "/");
                         if (!d.exists()) System.out.println(d.mkdir());
                         if (!iF.exists()) {
                             System.out.println("iF.createNewFile() = " + iF.createNewFile());
@@ -133,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
                             iIs.close();
                             iIsr.close();
                         }
-                        File f = new File(ESD + "/mNote/t/" + i + ".n");
+                        File f = new File(MP + "/t/" + i + ".n");
                         System.out.println(f.createNewFile());
                         OutputStream os = new FileOutputStream(f, false);
                         os.write(new byte[]{-2});
@@ -168,21 +170,27 @@ public class MainActivity extends AppCompatActivity {
                 m3 = findViewById(R.id.m3);
         m1.setOnClickListener(v -> {
             try {
-                wtFFB(tvAc(tv), (byte) 1);
+                File f = tvAc(tv);
+                wtFFB(f, (byte) 1);
+                mvAc(f);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
         m2.setOnClickListener(v -> {
             try {
-                wtFFB(tvAc(tv), (byte) 2);
+                File f = tvAc(tv);
+                wtFFB(f, (byte) 2);
+                mvAc(f);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
         m3.setOnClickListener(v -> {
             try {
-                wtFFB(tvAc(tv), (byte) 3);
+                File f = tvAc(tv);
+                wtFFB(f, (byte) 3);
+                mvAc(f);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -223,6 +231,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     private File tvAc(TextView textView) {
+        if (Fs.length == 0) {
+            File[] hR_Fs = new File(MP + "/hR/").listFiles();
+
+        }
         List<Integer> hvT = new ArrayList<>();
         int exceptI = -1;
         File f = null;
@@ -233,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
                 int rI = getRI_F(exceptI);
                 int i = fNInArr_fI(FsS_i, rI);
                 if (i != -1) {
-                    f = new File(ESD + "/mNote/t/" + i + ".n");
+                    f = new File(MP + "/t/" + Fs[i] + ".n");
                     textView.setText(getFCtt(f).toString());
                     break;
                 } else {
@@ -246,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < Fs.length; i++) {
                 if (rI == FsS_i[i]) {
                     b = true;
-                    textView.setText(getFCtt(new File(ESD + "/mNote/t/" + i + ".n")).toString());
+                    textView.setText(getFCtt(new File(MP + "/t/" + i + ".n")).toString());
                     break;
                 }
             }
@@ -254,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
 
             }*/
             /*for (int i : Fs) {
-                File f = new File(ESD + "/mNote/t/" + i + ".n");
+                File f = new File(MP + "/t/" + i + ".n");
                 int currFI = getFF(f);
                 FileInputStream fis = new FileInputStream(f);
                 System.out.println("fis.skip(1L) = " + fis.skip(1L));
@@ -288,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
         }*/
         if (setFs(true).length != 0) {
             try {
-                FileInputStream fis = new FileInputStream(ESD + "/mNote/t/" + Random.ran_sc(0, Fs.length - 1) + ".n");
+                FileInputStream fis = new FileInputStream(MP + "/t/" + Random.ran_sc(0, Fs.length - 1) + ".n");
                 BufferedReader br = new BufferedReader(new InputStreamReader(fis, "GBK"));
                 StringBuilder sb = new StringBuilder();
                 String r = br.readLine();
@@ -320,7 +332,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void scanNumFile_i() {
-        File f = new File(ESD + "/mNote/i");
+        File f = new File(MP + "/i");
         try {
             if (!f.exists()) System.out.println(f.createNewFile());
             FileOutputStream fos = new FileOutputStream(f);
@@ -378,7 +390,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private int[] setFs(boolean wF) {
-        File p = new File(ESD + "/mNote/");
+        File p = new File(MP + "/");
         final List<Integer> l = new ArrayList<>();
         new u_File.TraversalFile(p).Do(new u_File.TraversalFileDo() {
             @Override
@@ -405,7 +417,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (wF) {
             try {
-                File f = new File(ESD + "/mNote/i");
+                File f = new File(MP + "/i");
 //                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f, false), "GBK"));
                 OutputStream os = new FileOutputStream(f, false);
                 OutputStreamWriter osw = new OutputStreamWriter(os, "GBK");
@@ -470,7 +482,7 @@ public class MainActivity extends AppCompatActivity {
         FsS_i = new int[Fs.length];
         for (int i = 0; i < Fs.length; i++) {
             try {
-                FsS_i[i] = getFF(new File(ESD + "/mNote/t/" + Fs[i] + ".n"));
+                FsS_i[i] = getFF(new File(MP + "/t/" + Fs[i] + ".n"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -501,7 +513,7 @@ public class MainActivity extends AppCompatActivity {
         if (f == null) return;
         InputStream is = new FileInputStream(f);
         System.out.println("is.skip(1L) = " + is.skip(1L));
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        @SuppressWarnings("SpellCheckingInspection") ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.write(new byte[]{b});
         baos.flush();
         u_File.StreamWrite(is, baos);
@@ -510,6 +522,13 @@ public class MainActivity extends AppCompatActivity {
         is.close();
     }
 
-    public static void main(String[] args) {
+    private void mvAc(File f) {
+        try {
+            u_File.FileCopy(f, new File(MP + "/hR/" + f.getName().split("\\.")[0]));
+            if (!f.delete())
+                Toast.makeText(this, "move false", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "move " + e.toString(), Toast.LENGTH_SHORT).show();
+        }
     }
 }
