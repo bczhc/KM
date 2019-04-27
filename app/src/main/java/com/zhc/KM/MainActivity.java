@@ -35,11 +35,13 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class MainActivity extends AppCompatActivity {
     private int[] Fs, FsS_i;
     private String ESD, MP;
     private TextView tv;
+    final private byte /*SCAN_ALL_ = 0, SCAN_IN_t_ = 1, CHECK_NO_F_X = 0, */CHECK_ALL_F_N = 1;
 
     {
         try {
@@ -242,7 +244,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        List<Integer> hvT = new ArrayList<>();
         int exceptI = -1;
         File f;
         try {
@@ -258,8 +259,6 @@ public class MainActivity extends AppCompatActivity {
                     return f;
                 } else {
                     exceptI = rI;
-                    hvT.add(rI);
-                    if (hvT.size() >= 3) break;
                 }
             }
             /*
@@ -344,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void f(File file) {
                             String fileName = file.getName();
-                            if (ckF(file)) {
+                            if (ckF(file, (byte) 0)) {
                                 try {
                                     System.out.println("file.getCanonicalPath() = " + file.getCanonicalPath());
                                     l.add(Integer.parseInt(fileName.split("\\.")[0]));
@@ -395,7 +394,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void f(File file) {
                 String fileName = file.getName();
-                if (ckF(file)) {
+                if (ckF(file, CHECK_ALL_F_N)) {
                     l.add(Integer.parseInt(fileName.split("\\.")[0]));
                 }
             }
@@ -463,29 +462,16 @@ public class MainActivity extends AppCompatActivity {
         return c;
     }*/
 
-    private boolean ckF(File file) {
+    private boolean ckF(File file, byte mode) {
         String fileName = file.getName();
-        return new IsNum().isNum(fileName.split("\\.")[0]) && u_File.o.getFileExtension(file).equals("n");
-    }
-
-    private int getFF(File file) throws IOException {
-        InputStream is = new FileInputStream(file);
-        byte[] b = new byte[1];
-        System.out.println("is.read(b) = " + is.read(b));
-        is.close();
-        return -b[0];
+        return (mode == CHECK_ALL_F_N) ? new IsNum().isNum(fileName.split("\\.")[0]) && u_File.o.getFileExtension(file).equals("n")
+                : (new IsNum().isNum(fileName.split("\\.")[0]));
     }
 
     private void setFsS_i() {
         setFs(false);
         FsS_i = new int[Fs.length];
-        for (int i = 0; i < Fs.length; i++) {
-            try {
-                FsS_i[i] = getFF(new File(MP + "/t/" + Fs[i] + ".n"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        FsS_i = new s().getFF(Fs, MP);
     }
 
     private StringBuilder getFCtt(File file) throws IOException {
@@ -527,7 +513,71 @@ public class MainActivity extends AppCompatActivity {
             if (!f.delete())
                 Toast.makeText(this, "move false", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
+            e.printStackTrace();
             Toast.makeText(this, "move " + e.toString(), Toast.LENGTH_SHORT).show();
         }
+    }
+}
+
+class s implements Runnable {
+    private int fN;
+    private static CountDownLatch latch;
+    private Thread t;
+    private int i;
+    private static int[] r;
+    private static String G_MP = null;
+
+    int[] getFF(int[] Fs, String MP) {
+        int fL = Fs.length;
+        r = new int[fL];
+        latch = new CountDownLatch(fL);
+        G_MP = MP;
+        for (int j = 0; j < fL; j++) {
+            new s(j, Fs[j]).RT();
+        }
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return r;
+    }
+
+    @Override
+    public void run() {
+        try {
+            r[this.i] = getFF_DO(new File(G_MP + "/t/" + fN + ".n"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        latch.countDown();
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void RT() {
+        if (t == null) {
+            t = new Thread(this);
+            t.start();
+        }
+    }
+
+    private int getFF_DO(File file) throws IOException {
+        InputStream is = new FileInputStream(file);
+        byte[] b = new byte[1];
+        System.out.println("is.read(b) = " + is.read(b));
+        is.close();
+        return -b[0];
+    }
+
+    private s(int i, int fN) {
+        this.i = i;
+        this.fN = fN;
+    }
+
+    s() {
     }
 }
