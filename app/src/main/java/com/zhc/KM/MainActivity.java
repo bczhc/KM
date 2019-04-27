@@ -23,6 +23,7 @@ import com.zhc.u.u_File;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -36,7 +37,17 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private int[] Fs;
+    private int[] Fs, FsS_i;
+    private String ESD;
+    private TextView tv;
+
+    {
+        try {
+            ESD = Environment.getExternalStorageDirectory().getCanonicalPath();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +60,22 @@ public class MainActivity extends AppCompatActivity {
             }, 0);
         } else {
             setContentView(R.layout.activity_main);
-            firstShow(findViewById(R.id.textView));
+            File[] ds = {
+                    new File(ESD + "/mNote"),
+                    new File(ESD + "/mNote/t"),
+            };
+            for (File d : ds) {
+                if (!d.exists()) {
+                    if (!d.mkdir()) {
+                        Toast.makeText(this, "mkdirError", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
             mA();
+            tv = findViewById(R.id.textView);
+            firstShow(tv);
         }
+        System.out.println("ESD = " + ESD);
     }
 
     @Override
@@ -59,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 0) {
             System.out.println("Arrays.toString(grantResults) = " + Arrays.toString(grantResults));
             if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                Alert(MainActivity.this, "需要申请存储权限");
+                Alert(MainActivity.this);
                 ActivityCompat.requestPermissions(MainActivity.this, new String[]{
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
                         Manifest.permission.INTERNET
@@ -75,12 +99,9 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("ResourceType")
     private void mA() {
-        File d0 = new File(Environment.getExternalStorageDirectory() + "/mNote/");
-        if (!d0.exists()) System.out.println(d0.mkdir());
+
         ImageView iv = findViewById(R.id.imgV);
         iv.setImageResource(R.raw.r);
-        TextView tv = findViewById(R.id.textView);
-        tvAc(tv);
         Button btn1 = findViewById(R.id.btn1);
         iv.setOnClickListener(v_iv -> scanNumFile_i());
         btn1.setOnClickListener(v -> {
@@ -94,16 +115,16 @@ public class MainActivity extends AppCompatActivity {
 
                 Button sbmB = findViewById(R.id.submitB);
                 final EditText et = findViewById(R.id.editText);
-                final File eP = Environment.getExternalStorageDirectory();
                 sbmB.setOnClickListener(v12 -> {
-                    File iF = new File(eP + "/mNote/i");
+                    File iF = new File(ESD + "/mNote/i");
                     int i = 0;
                     try {
-                        File d = new File(eP + "/mNote/");
+                        File d = new File(ESD + "/mNote/");
                         if (!d.exists()) System.out.println(d.mkdir());
                         if (!iF.exists()) {
-                            System.out.println(iF.createNewFile());
+                            System.out.println("iF.createNewFile() = " + iF.createNewFile());
                         } else {
+//                            setFs(true);
                             InputStream iIs = new FileInputStream(iF);
                             InputStreamReader iIsr = new InputStreamReader(iIs, "GBK");
                             BufferedReader iBr = new BufferedReader(iIsr);
@@ -112,9 +133,10 @@ public class MainActivity extends AppCompatActivity {
                             iIs.close();
                             iIsr.close();
                         }
-                        File f = new File(eP + "/mNote/" + i);
+                        File f = new File(ESD + "/mNote/t/" + i + ".n");
                         System.out.println(f.createNewFile());
-                        OutputStream os = new FileOutputStream(f);
+                        OutputStream os = new FileOutputStream(f, false);
+                        os.write(new byte[]{-2});
                         BufferedWriter bw;
                         OutputStreamWriter osw = new OutputStreamWriter(os, "GBK");
                         bw = new BufferedWriter(osw);
@@ -134,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "第" + i + "个笔记", Toast.LENGTH_SHORT).show();
                     } catch (IOException e) {
                         e.printStackTrace();
+                        Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
                     }
                 });
             } catch (Exception e) {
@@ -144,6 +167,25 @@ public class MainActivity extends AppCompatActivity {
                 m2 = findViewById(R.id.m2),
                 m3 = findViewById(R.id.m3);
         m1.setOnClickListener(v -> {
+            try {
+                wtFFB(tvAc(tv), (byte) 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        m2.setOnClickListener(v -> {
+            try {
+                wtFFB(tvAc(tv), (byte) 2);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        m3.setOnClickListener(v -> {
+            try {
+                wtFFB(tvAc(tv), (byte) 3);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
     }
 
@@ -180,17 +222,87 @@ public class MainActivity extends AppCompatActivity {
     }*/
 
 
-    private void tvAc(TextView textView) {
+    private File tvAc(TextView textView) {
+        List<Integer> hvT = new ArrayList<>();
+        int exceptI = -1;
+        File f = null;
+        try {
+            setFs(false);
+            setFsS_i();
+            while (true) {
+                int rI = getRI_F(exceptI);
+                int i = fNInArr_fI(FsS_i, rI);
+                if (i != -1) {
+                    f = new File(ESD + "/mNote/t/" + i + ".n");
+                    textView.setText(getFCtt(f).toString());
+                    break;
+                } else {
+                    exceptI = rI;
+                    hvT.add(rI);
+                    if (hvT.size() >= 3) break;
+                }
+            }
+            /*
+            for (int i = 0; i < Fs.length; i++) {
+                if (rI == FsS_i[i]) {
+                    b = true;
+                    textView.setText(getFCtt(new File(ESD + "/mNote/t/" + i + ".n")).toString());
+                    break;
+                }
+            }
+            if (!b) {
 
+            }*/
+            /*for (int i : Fs) {
+                File f = new File(ESD + "/mNote/t/" + i + ".n");
+                int currFI = getFF(f);
+                FileInputStream fis = new FileInputStream(f);
+                System.out.println("fis.skip(1L) = " + fis.skip(1L));
+                if (rI == currFI) {
+                    InputStreamReader isr = new InputStreamReader(fis, "GBK");
+                    BufferedReader br = new BufferedReader(isr);
+                    StringBuilder sb = new StringBuilder();
+                    String r;
+                    if ((r = br.readLine()) != null) {
+                        sb.append(r).append("\n");
+                    }
+                    textView.setText(sb.toString());
+                    break;
+                }
+            }*/
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
+        }
+        return f;
     }
 
     private void firstShow(TextView textView) {
-        int max = setFs().length;
+        /*int max = setFs().length;
         File f = new File(Environment.getExternalStorageDirectory() + "/mNote/" + Fs[Random.ran_sc(0, max - 1)]);
         try {
             textView.setText(u_File.o.fileOpen_String_OneLine(f, "GBK"));
         } catch (IOException e) {
             e.printStackTrace();
+        }*/
+        if (setFs(true).length != 0) {
+            try {
+                FileInputStream fis = new FileInputStream(ESD + "/mNote/t/" + Random.ran_sc(0, Fs.length - 1) + ".n");
+                BufferedReader br = new BufferedReader(new InputStreamReader(fis, "GBK"));
+                StringBuilder sb = new StringBuilder();
+                String r = br.readLine();
+                while (r != null) {
+                    sb.append(r).append("\n");
+                    r = br.readLine();
+                }
+                textView.setText(sb.toString());
+                br.close();
+                fis.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -203,12 +315,12 @@ public class MainActivity extends AppCompatActivity {
         android.os.Process.killProcess(android.os.Process.myPid());
     }*/
 
-    private void Alert(Context ctx, String s) {
-        new AlertDialog.Builder(ctx).setTitle(s);
+    private void Alert(Context ctx) {
+        new AlertDialog.Builder(ctx).setTitle("需要申请存储权限");
     }
 
     private void scanNumFile_i() {
-        File f = new File(Environment.getExternalStorageDirectory() + "/mNote/i");
+        File f = new File(ESD + "/mNote/i");
         try {
             if (!f.exists()) System.out.println(f.createNewFile());
             FileOutputStream fos = new FileOutputStream(f);
@@ -220,11 +332,17 @@ public class MainActivity extends AppCompatActivity {
                     new u_File.TraversalFileDo() {
                         @Override
                         public void f(File file) {
-                            if (new IsNum().isNum(file.getName())) {
+                            String fileName = file.getName();
+                            if (ckF(file)) {
                                 try {
                                     System.out.println("file.getCanonicalPath() = " + file.getCanonicalPath());
-                                    l.add(Integer.parseInt(file.getName()));
+                                    l.add(Integer.parseInt(fileName.split("\\.")[0]));
                                     ++cNF[0];
+                                    {
+                                        System.out.println("fileName = " + fileName);
+                                        System.out.println("fileName.split(\"\\\\.\")[0] = " + fileName.split("\\.")[0]);
+                                        System.out.println("u_File.o.getFileExtension(file) = " + u_File.o.getFileExtension(file));
+                                    }
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -259,14 +377,15 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private int[] setFs() {
-        File p = new File(Environment.getExternalStorageDirectory() + "/mNote/");
+    private int[] setFs(boolean wF) {
+        File p = new File(ESD + "/mNote/");
         final List<Integer> l = new ArrayList<>();
         new u_File.TraversalFile(p).Do(new u_File.TraversalFileDo() {
             @Override
             public void f(File file) {
-                if (new IsNum().isNum(file.getName())) {
-                    l.add(Integer.parseInt(file.getName()));
+                String fileName = file.getName();
+                if (ckF(file)) {
+                    l.add(Integer.parseInt(fileName.split("\\.")[0]));
                 }
             }
 
@@ -284,8 +403,111 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < l.size(); i++) {
             Fs[i] = Integer.parseInt(String.valueOf(l.get(i)));
         }
-
+        if (wF) {
+            try {
+                File f = new File(ESD + "/mNote/i");
+//                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f, false), "GBK"));
+                OutputStream os = new FileOutputStream(f, false);
+                OutputStreamWriter osw = new OutputStreamWriter(os, "GBK");
+                BufferedWriter bw = new BufferedWriter(osw);
+                bw.write(String.valueOf(Fs.length));
+                bw.flush();
+                System.out.println("Fs.length = " + Fs.length);
+                bw.close();
+                osw.close();
+                os.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
+            }
+        }
         return Fs;
+    }
+
+    private int getRI_F(int non) {
+        int r;
+        while (true) {
+            int rR = Random.ran_sc(1, 6);
+            r = (rR == 1) ? 1 : ((rR == 2 || rR == 3) ? 2 : 3);
+            if (r != non) return r;
+        }
+    }
+
+    /*private int m2FC() {
+        File d = new File(ESD + "/t/");
+        int c = 0;
+        try {
+            File[] listFiles = d.listFiles();
+            for (File file : listFiles) {
+                String fileName = file.getName();
+                if (ckF(file)) {
+                    ++c;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
+            return 0;
+        }
+        return c;
+    }*/
+
+    private boolean ckF(File file) {
+        String fileName = file.getName();
+        return new IsNum().isNum(fileName.split("\\.")[0]) && u_File.o.getFileExtension(file).equals("n");
+    }
+
+    private int getFF(File file) throws IOException {
+        InputStream is = new FileInputStream(file);
+        byte[] b = new byte[1];
+        System.out.println("is.read(b) = " + is.read(b));
+        is.close();
+        return -b[0];
+    }
+
+    private void setFsS_i() {
+        setFs(false);
+        FsS_i = new int[Fs.length];
+        for (int i = 0; i < Fs.length; i++) {
+            try {
+                FsS_i[i] = getFF(new File(ESD + "/mNote/t/" + Fs[i] + ".n"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private StringBuilder getFCtt(File file) throws IOException {
+        FileInputStream is = new FileInputStream(file);
+        System.out.println("is.skip(1L) = " + is.skip(1L));
+        StringBuilder sb = new StringBuilder();
+        BufferedReader br = new BufferedReader(new InputStreamReader(is, "GBK"));
+        String r;
+        while ((r = br.readLine()) != null) {
+            sb.append(r).append("\n");
+        }
+        is.close();
+        return sb;
+    }
+
+    private int fNInArr_fI(int[] ints, int i) {
+        for (int j = 0; j < ints.length; j++) {
+            if (i == ints[j]) return j;
+        }
+        return -1;
+    }
+
+    private void wtFFB(File f, byte b) throws IOException {
+        if (f == null) return;
+        InputStream is = new FileInputStream(f);
+        System.out.println("is.skip(1L) = " + is.skip(1L));
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(new byte[]{b});
+        baos.flush();
+        u_File.StreamWrite(is, baos);
+        OutputStream os = new FileOutputStream(f, false);
+        u_File.StreamWrite(u_File.StreamParse(baos), os);
+        is.close();
     }
 
     public static void main(String[] args) {
