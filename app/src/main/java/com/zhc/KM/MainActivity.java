@@ -44,7 +44,7 @@ import java.util.concurrent.CountDownLatch;
 public class MainActivity extends AppCompatActivity {
     private int[] Fs, FsS_i;
     private String ESD, MP;
-    final private byte /*SCAN_ALL_ = 0, SCAN_IN_t_ = 1, CHECK_NO_F_X = 0, */CHECK_ALL_F_N = 1;
+    final private byte CHECK_ALL_F_N = 1;
     private int RI_F_i = 0;
 
     {
@@ -111,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
         Button btn1 = findViewById(R.id.btn1);
         iv.setOnClickListener(v_iv -> scanNumFile_i(true));
         btn1.setOnClickListener(v -> {
-//            setFs(true);
             scanNumFile_i(false);
             setContentView(R.layout.wt);
             try {
@@ -133,7 +132,6 @@ public class MainActivity extends AppCompatActivity {
                         if (!iF.exists()) {
                             System.out.println("iF.createNewFile() = " + iF.createNewFile());
                         } else {
-//                            setFs(true);
                             InputStream iIs = new FileInputStream(iF);
                             InputStreamReader iIsr = new InputStreamReader(iIs, "GBK");
                             BufferedReader iBr = new BufferedReader(iIsr);
@@ -204,39 +202,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /*private void tBAc(TextView tv_) {
-        try {
-            int i = 0;
-            try {
-                File f = new File(Environment.getExternalStorageDirectory() + "/mNote/i");
-                InputStream is = new FileInputStream(f);
-                InputStreamReader isr = new InputStreamReader(is, "GBK");
-                BufferedReader br = new BufferedReader(isr);
-                i = Integer.parseInt(br.readLine());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            int rI = ran(i - 1);
-            File fO = new File(Environment.getExternalStorageDirectory() + "/mNote/" + rI);
-            BufferedReader br = new BufferedReader(
-                    new InputStreamReader(
-                            new FileInputStream(fO), "GBK"
-                    )
-            );
-            StringBuilder sb = new StringBuilder();
-            String r = br.readLine();
-            while (r != null) {
-                sb.append(r);
-                r = br.readLine();
-            }
-            r = sb.toString();
-            tv_.setText(r);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
-
-
     private File tvAc() {
         setFs(true);
         TextView textView = findViewById(R.id.textView);
@@ -267,35 +232,6 @@ public class MainActivity extends AppCompatActivity {
                     exceptI = rI;
                 }
             }
-            /*
-            for (int i = 0; i < Fs.length; i++) {
-                if (rI == FsS_i[i]) {
-                    b = true;
-                    textView.setText(getFCtt(new File(MP + "/t/" + i + ".n")).toString());
-                    break;
-                }
-            }
-            if (!b) {
-
-            }*/
-            /*for (int i : Fs) {
-                File f = new File(MP + "/t/" + i + ".n");
-                int currFI = getFF(f);
-                FileInputStream fis = new FileInputStream(f);
-                System.out.println("fis.skip(1L) = " + fis.skip(1L));
-                if (rI == currFI) {
-                    InputStreamReader isr = new InputStreamReader(fis, "GBK");
-                    BufferedReader br = new BufferedReader(isr);
-                    StringBuilder sb = new StringBuilder();
-                    String r;
-                    if ((r = br.readLine()) != null) {
-                        sb.append(r).append("\n");
-                    }
-                    textView.setText(sb.toString());
-                    break;
-                }
-            }*/
-
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
@@ -304,13 +240,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void firstShow() {
-        /*int max = setFs().length;
-        File f = new File(Environment.getExternalStorageDirectory() + "/mNote/" + Fs[Random.ran_sc(0, max - 1)]);
-        try {
-            textView.setText(u_File.o.fileOpen_String_OneLine(f, "GBK"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
         TextView textView = findViewById(R.id.textView);
         if (setFs(true).length != 0) {
             try {
@@ -322,15 +251,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-    /*private void restartApplication(Context context) {
-        final Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
-        if (intent != null) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        }
-        startActivity(intent);
-        android.os.Process.killProcess(android.os.Process.myPid());
-    }*/
 
     private void Alert(Context ctx) {
         new AlertDialog.Builder(ctx).setTitle("需要申请存储权限");
@@ -423,7 +343,6 @@ public class MainActivity extends AppCompatActivity {
         if (wF) {
             try {
                 File f = new File(MP + "/i");
-//                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f, false), "GBK"));
                 OutputStream os = new FileOutputStream(f, false);
                 OutputStreamWriter osw = new OutputStreamWriter(os, "GBK");
                 BufferedWriter bw = new BufferedWriter(osw);
@@ -456,25 +375,6 @@ public class MainActivity extends AppCompatActivity {
             if (++RI_F_i == data.length) RI_F_i = 0;
         }
     }
-
-    /*private int m2FC() {
-        File d = new File(ESD + "/t/");
-        int c = 0;
-        try {
-            File[] listFiles = d.listFiles();
-            for (File file : listFiles) {
-                String fileName = file.getName();
-                if (ckF(file)) {
-                    ++c;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
-            return 0;
-        }
-        return c;
-    }*/
 
     private boolean ckF(File file, byte mode) {
         String fileName = file.getName();
