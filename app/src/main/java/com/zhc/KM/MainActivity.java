@@ -493,8 +493,8 @@ class s implements Runnable {
     }
 
     private s(int i, int fN) {
-        this.i = i;
         this.fN = fN;
+        this.i = i;
     }
 
     s() {
