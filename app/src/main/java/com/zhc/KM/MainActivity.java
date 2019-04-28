@@ -37,11 +37,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+/**
+ * @author zhc
+ * @version 1.0
+ */
 public class MainActivity extends AppCompatActivity {
     private int[] Fs, FsS_i;
     private String ESD, MP;
-    private TextView tv;
     final private byte /*SCAN_ALL_ = 0, SCAN_IN_t_ = 1, CHECK_NO_F_X = 0, */CHECK_ALL_F_N = 1;
+    private int RI_F_i = 0;
 
     {
         try {
@@ -63,21 +67,8 @@ public class MainActivity extends AppCompatActivity {
             }, 0);
         } else {
             setContentView(R.layout.activity_main);
-            File[] ds = {
-                    new File(MP),
-                    new File(MP + "/t"),
-                    new File(MP + "/hR")
-            };
-            for (File d : ds) {
-                if (!d.exists()) {
-                    if (!d.mkdir()) {
-                        Toast.makeText(this, "mkdirError", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
             mA();
-            tv = findViewById(R.id.textView);
-            firstShow(tv);
+            firstShow();
         }
         System.out.println("ESD = " + ESD);
     }
@@ -103,18 +94,32 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("ResourceType")
     private void mA() {
-
+        File[] ds = {
+                new File(MP),
+                new File(MP + "/t"),
+                new File(MP + "/hR")
+        };
+        for (File d : ds) {
+            if (!d.exists()) {
+                if (!d.mkdir()) {
+                    Toast.makeText(this, "mkdirError", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
         ImageView iv = findViewById(R.id.imgV);
         iv.setImageResource(R.raw.r);
         Button btn1 = findViewById(R.id.btn1);
-        iv.setOnClickListener(v_iv -> scanNumFile_i());
+        iv.setOnClickListener(v_iv -> scanNumFile_i(true));
         btn1.setOnClickListener(v -> {
+//            setFs(true);
+            scanNumFile_i(false);
             setContentView(R.layout.wt);
             try {
                 Button bkB = findViewById(R.id.bkB);
                 bkB.setOnClickListener(v1 -> {
                     setContentView(R.layout.activity_main);
                     mA();
+                    firstShow();
                 });
 
                 Button sbmB = findViewById(R.id.submitB);
@@ -172,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
                 m3 = findViewById(R.id.m3);
         m1.setOnClickListener(v -> {
             try {
-                File f = tvAc(tv);
+                File f = tvAc();
                 wtFFB(f, (byte) -1);
                 mvAc(f);
             } catch (IOException e) {
@@ -181,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
         });
         m2.setOnClickListener(v -> {
             try {
-                File f = tvAc(tv);
+                File f = tvAc();
                 wtFFB(f, (byte) -2);
                 mvAc(f);
             } catch (IOException e) {
@@ -190,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
         });
         m3.setOnClickListener(v -> {
             try {
-                File f = tvAc(tv);
+                File f = tvAc();
                 wtFFB(f, (byte) -3);
                 mvAc(f);
             } catch (IOException e) {
@@ -232,8 +237,9 @@ public class MainActivity extends AppCompatActivity {
     }*/
 
 
-    private File tvAc(TextView textView) {
-        setFs(false);
+    private File tvAc() {
+        setFs(true);
+        TextView textView = findViewById(R.id.textView);
         if (Fs.length == 0) {
             File[] hR_Fs = new File(MP + "/hR/").listFiles();
             for (File f : hR_Fs) {
@@ -247,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
         int exceptI = -1;
         File f;
         try {
-            setFs(false);
+            setFs(true);
             setFsS_i();
             while (true) {
                 int rI = getRI_F(exceptI);
@@ -297,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
-    private void firstShow(TextView textView) {
+    private void firstShow() {
         /*int max = setFs().length;
         File f = new File(Environment.getExternalStorageDirectory() + "/mNote/" + Fs[Random.ran_sc(0, max - 1)]);
         try {
@@ -305,9 +311,10 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }*/
+        TextView textView = findViewById(R.id.textView);
         if (setFs(true).length != 0) {
             try {
-                File f = new File(MP + "/t/" + Random.ran_sc(0, Fs.length - 1) + ".n");
+                File f = new File(MP + "/t/" + Fs[Random.ran_sc(0, Fs.length - 1)] + ".n");
                 textView.setText(getFCtt(f).toString());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -329,7 +336,7 @@ public class MainActivity extends AppCompatActivity {
         new AlertDialog.Builder(ctx).setTitle("需要申请存储权限");
     }
 
-    private void scanNumFile_i() {
+    private void scanNumFile_i(boolean toastV) {
         File f = new File(MP + "/i");
         try {
             if (!f.exists()) System.out.println(f.createNewFile());
@@ -380,14 +387,14 @@ public class MainActivity extends AppCompatActivity {
                 Fs[i] = Integer.parseInt(String.valueOf(l.get(i)));
             }
             System.out.println("Fs = " + Arrays.toString(Fs));
-            Toast.makeText(this, "有" + cNF[0] + "条笔记", Toast.LENGTH_SHORT).show();
+            if (toastV) Toast.makeText(this, "有" + cNF[0] + "条笔记", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
     }
 
-    private int[] setFs(boolean wF) {
+    private int[] setFs(@SuppressWarnings("SameParameterValue") boolean wF) {
         File p = new File(MP + "/");
         final List<Integer> l = new ArrayList<>();
         new u_File.TraversalFile(p).Do(new u_File.TraversalFileDo() {
@@ -435,11 +442,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private int getRI_F(int non) {
-        int r;
+//        Random method
+        /*int r;
         while (true) {
             int rR = Random.ran_sc(1, 6);
             r = (rR == 1) ? 1 : ((rR == 2 || rR == 3) ? 2 : 3);
             if (r != non) return r;
+        }*/
+        //Setting method
+        int[] data = {3, 3, 2, 2, 3, 1, 3, 2};
+        while (true) {
+            if (data[RI_F_i] != non) return data[RI_F_i];
+            if (++RI_F_i == data.length) RI_F_i = 0;
         }
     }
 
@@ -469,7 +483,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setFsS_i() {
-        setFs(false);
+        setFs(true);
         FsS_i = new int[Fs.length];
         FsS_i = new s().getFF(Fs, MP);
     }
