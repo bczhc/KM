@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
             setContentView(R.layout.activity_main);
             mA();
             firstShow();
+            scanNumFile_i(true);
         }
         System.out.println("ESD = " + ESD);
     }
@@ -87,12 +88,14 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "ok", Toast.LENGTH_SHORT).show();
                 setContentView(R.layout.activity_main);
                 mA();
+                firstShow();
+                scanNumFile_i(true);
             }
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
-    @SuppressLint("ResourceType")
+    @SuppressLint({"ResourceType", "DefaultLocale"})
     private void mA() {
         File[] ds = {
                 new File(MP),
@@ -119,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
                     setContentView(R.layout.activity_main);
                     mA();
                     firstShow();
+                    scanNumFile_i(false);
                 });
 
                 Button sbmB = findViewById(R.id.submitB);
@@ -160,7 +164,8 @@ public class MainActivity extends AppCompatActivity {
                         iBw.close();
                         iOs.close();
                         iOsw.close();
-                        Toast.makeText(MainActivity.this, "第" + i + "个笔记", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(MainActivity.this, "第" + i + "个笔记", Toast.LENGTH_SHORT).show();
+                        ((TextView) findViewById(R.id.noteN)).setText(String.format("第%d个笔记", i));
                     } catch (IOException e) {
                         e.printStackTrace();
                         Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
