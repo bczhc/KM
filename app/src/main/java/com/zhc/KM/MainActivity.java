@@ -4,34 +4,20 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import com.zhc.u.Random;
 import com.zhc.u.common.IsNum;
 import com.zhc.u.u_File;
+import Z.WebPush;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private int[] Fs, FsS_i;
     private String ESD, MP;
     final private byte CHECK_ALL_F_N = 1;
+    @SuppressWarnings("unused")
     private int RI_F_i = 0;
 
     {
@@ -171,10 +158,46 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
                     }
                 });
+                sbmB.setOnLongClickListener(v1 -> {
+                    String s = et.getText().toString();
+                    final boolean[] f = {true};
+                    CountDownLatch latch = new CountDownLatch(1);
+                    new Thread(() -> {
+                        try {
+                            WebPush.ZHC.o.wPush(String.valueOf(Fs.length), s, "103.46.128.43:19353/u/push.do");
+                            latch.countDown();
+                        } catch (IOException e) {
+                            f[0] = false;
+                            e.printStackTrace();
+                            try {
+                                latch.countDown();
+                            } catch (Exception e1) {
+                                e1.printStackTrace();
+                            }
+                        }
+                    }).start();
+                    try {
+                        latch.await();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (f[0])
+                        ((TextView) (findViewById(R.id.noteN))).setText(String.format(getResources().getString(R.string.tvT), "ok"));
+                    else
+                        ((TextView) (findViewById(R.id.noteN))).setText(String.format(getResources().getString(R.string.tvT), "failed"));
+                    return false;
+                });
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
+        /*btn1.setOnLongClickListener(v -> {
+            new Thread(() -> {
+                File f = null;
+
+            }).start();
+            return true;
+        });*/
         Button m1 = findViewById(R.id.m1),
                 m2 = findViewById(R.id.m2),
                 m3 = findViewById(R.id.m3);
@@ -367,18 +390,18 @@ public class MainActivity extends AppCompatActivity {
 
     private int getRI_F(int non) {
 //        Random method
-        /*int r;
+        int r;
         while (true) {
             int rR = Random.ran_sc(1, 6);
             r = (rR == 1) ? 1 : ((rR == 2 || rR == 3) ? 2 : 3);
             if (r != non) return r;
-        }*/
-        //Setting method
-        int[] data = {3, 3, 2, 2, 3, 1, 3, 2};
+        }
+        //set method
+        /*int[] data = {3, 3, 2, 2, 3, 1, 3, 2};
         while (true) {
             if (data[RI_F_i] != non) return data[RI_F_i];
             if (++RI_F_i == data.length) RI_F_i = 0;
-        }
+        }*/
     }
 
     private boolean ckF(File file, byte mode) {
@@ -455,7 +478,7 @@ class s implements Runnable {
             new s(j, Fs[j]).RT();
         }
         try {
-            latch.await();
+            if (Fs.length != 0) latch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
